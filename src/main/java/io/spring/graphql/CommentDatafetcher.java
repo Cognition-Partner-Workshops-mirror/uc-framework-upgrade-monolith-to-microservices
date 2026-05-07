@@ -5,8 +5,7 @@ import com.netflix.graphql.dgs.DgsData;
 import com.netflix.graphql.dgs.DgsDataFetchingEnvironment;
 import com.netflix.graphql.dgs.InputArgument;
 import graphql.execution.DataFetcherResult;
-import graphql.relay.DefaultConnectionCursor;
-import graphql.relay.DefaultPageInfo;
+// DefaultConnectionCursor and DefaultPageInfo removed — using DGS-generated PageInfo type instead
 import io.spring.application.CommentQueryService;
 import io.spring.application.CursorPageParameter;
 import io.spring.application.CursorPager;
@@ -78,7 +77,7 @@ public class CommentDatafetcher {
               current,
               new CursorPageParameter<>(DateTimeCursor.parse(before), last, Direction.PREV));
     }
-    graphql.relay.PageInfo pageInfo = buildCommentPageInfo(comments);
+    io.spring.graphql.types.PageInfo pageInfo = buildCommentPageInfo(comments);
     CommentsConnection result =
         CommentsConnection.newBuilder()
             .pageInfo(pageInfo)
@@ -99,16 +98,18 @@ public class CommentDatafetcher {
         .build();
   }
 
-  private DefaultPageInfo buildCommentPageInfo(CursorPager<CommentData> comments) {
-    return new DefaultPageInfo(
-        comments.getStartCursor() == null
-            ? null
-            : new DefaultConnectionCursor(comments.getStartCursor().toString()),
-        comments.getEndCursor() == null
-            ? null
-            : new DefaultConnectionCursor(comments.getEndCursor().toString()),
-        comments.hasPrevious(),
-        comments.hasNext());
+  /**
+   * Builds a DGS-generated PageInfo instead of graphql.relay.DefaultPageInfo to match the type
+   * expected by the DGS codegen types in DGS 7.x (Spring Boot 3 upgrade).
+   */
+  private io.spring.graphql.types.PageInfo buildCommentPageInfo(CursorPager<CommentData> comments) {
+    return io.spring.graphql.types.PageInfo.newBuilder()
+        .startCursor(
+            comments.getStartCursor() == null ? null : comments.getStartCursor().toString())
+        .endCursor(comments.getEndCursor() == null ? null : comments.getEndCursor().toString())
+        .hasPreviousPage(comments.hasPrevious())
+        .hasNextPage(comments.hasNext())
+        .build();
   }
 
   private Comment buildCommentResult(CommentData comment) {
