@@ -13,8 +13,9 @@ public class DefaultJwtServiceTest {
 
   @BeforeEach
   public void setUp() {
+    // JJWT 0.12.x enforces >=512-bit (64-byte) keys for HS512
     jwtService =
-        new DefaultJwtService("123123123123123123123123123123123123123123123123123123123123", 3600);
+        new DefaultJwtService("12312312312312312312312312312312312312312312312312312312312312312312", 3600);
   }
 
   @Test
