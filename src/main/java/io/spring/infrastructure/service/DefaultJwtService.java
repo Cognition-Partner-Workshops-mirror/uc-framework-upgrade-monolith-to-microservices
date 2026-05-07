@@ -1,9 +1,6 @@
 package io.spring.infrastructure.service;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.spring.core.service.JwtService;
 import io.spring.core.user.User;
 import java.util.Date;
@@ -14,35 +11,43 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+// JJWT 0.12.x API: builder methods renamed (setSubject->subject, setExpiration->expiration),
+// parser changed (parserBuilder->parser, parseClaimsJws->parseSignedClaims, getBody->getPayload)
 @Component
 public class DefaultJwtService implements JwtService {
   private final SecretKey signingKey;
-  private final SignatureAlgorithm signatureAlgorithm;
   private int sessionTime;
 
   @Autowired
   public DefaultJwtService(
       @Value("${jwt.secret}") String secret, @Value("${jwt.sessionTime}") int sessionTime) {
     this.sessionTime = sessionTime;
-    signatureAlgorithm = SignatureAlgorithm.HS512;
-    this.signingKey = new SecretKeySpec(secret.getBytes(), signatureAlgorithm.getJcaName());
+    // Use HmacSHA512 directly instead of deprecated SignatureAlgorithm enum
+    this.signingKey = new SecretKeySpec(secret.getBytes(), "HmacSHA512");
   }
 
   @Override
   public String toToken(User user) {
+    // JJWT 0.12: setSubject() -> subject(), setExpiration() -> expiration()
     return Jwts.builder()
-        .setSubject(user.getId())
-        .setExpiration(expireTimeFromNow())
-        .signWith(signingKey)
+        .subject(user.getId())
+        .expiration(expireTimeFromNow())
+        .signWith(signingKey, Jwts.SIG.HS512)
         .compact();
   }
 
   @Override
   public Optional<String> getSubFromToken(String token) {
     try {
-      Jws<Claims> claimsJws =
-          Jwts.parserBuilder().setSigningKey(signingKey).build().parseClaimsJws(token);
-      return Optional.ofNullable(claimsJws.getBody().getSubject());
+      // JJWT 0.12: parserBuilder() -> parser(), setSigningKey() -> verifyWith(),
+      // parseClaimsJws() -> parseSignedClaims(), getBody() -> getPayload()
+      return Optional.ofNullable(
+          Jwts.parser()
+              .verifyWith(signingKey)
+              .build()
+              .parseSignedClaims(token)
+              .getPayload()
+              .getSubject());
     } catch (Exception e) {
       return Optional.empty();
     }
