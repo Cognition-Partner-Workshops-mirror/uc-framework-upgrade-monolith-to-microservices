@@ -39,8 +39,8 @@ public class WebSecurityConfig {
   }
 
   /**
-   * Replaces the old configure(HttpSecurity) override with a SecurityFilterChain bean. Uses the
-   * new lambda DSL and requestMatchers() instead of deprecated antMatchers().
+   * Replaces the old configure(HttpSecurity) override with a SecurityFilterChain bean. Uses the new
+   * lambda DSL and requestMatchers() instead of deprecated antMatchers().
    */
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {

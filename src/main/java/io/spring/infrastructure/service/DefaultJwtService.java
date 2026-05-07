@@ -45,8 +45,7 @@ public class DefaultJwtService implements JwtService {
   public Optional<String> getSubFromToken(String token) {
     try {
       // Migrated from deprecated parserBuilder/parseClaimsJws/getBody to new API
-      Jws<Claims> claimsJws =
-          Jwts.parser().verifyWith(signingKey).build().parseSignedClaims(token);
+      Jws<Claims> claimsJws = Jwts.parser().verifyWith(signingKey).build().parseSignedClaims(token);
       return Optional.ofNullable(claimsJws.getPayload().getSubject());
     } catch (Exception e) {
       return Optional.empty();

@@ -359,8 +359,7 @@ public class ArticleDatafetcher {
    * Builds a DGS-generated PageInfo instead of graphql.relay.DefaultPageInfo to match the type
    * expected by the DGS codegen types in DGS 7.x (Spring Boot 3 upgrade).
    */
-  private io.spring.graphql.types.PageInfo buildArticlePageInfo(
-      CursorPager<ArticleData> articles) {
+  private io.spring.graphql.types.PageInfo buildArticlePageInfo(CursorPager<ArticleData> articles) {
     return io.spring.graphql.types.PageInfo.newBuilder()
         .startCursor(
             articles.getStartCursor() == null ? null : articles.getStartCursor().toString())

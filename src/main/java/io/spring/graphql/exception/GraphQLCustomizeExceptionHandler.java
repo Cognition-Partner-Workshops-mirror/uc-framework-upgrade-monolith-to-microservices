@@ -24,8 +24,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * GraphQL exception handler upgraded for DGS 7.x (Spring Boot 3). The onException method now
- * returns CompletableFuture instead of a direct result, and the new method name is
- * handleException.
+ * returns CompletableFuture instead of a direct result, and the new method name is handleException.
  */
 @Component
 public class GraphQLCustomizeExceptionHandler implements DataFetcherExceptionHandler {
@@ -33,9 +32,7 @@ public class GraphQLCustomizeExceptionHandler implements DataFetcherExceptionHan
   private final DefaultDataFetcherExceptionHandler defaultHandler =
       new DefaultDataFetcherExceptionHandler();
 
-  /**
-   * Upgraded from synchronous onException to async handleException for DGS 7.x compatibility.
-   */
+  /** Upgraded from synchronous onException to async handleException for DGS 7.x compatibility. */
   @Override
   public CompletableFuture<DataFetcherExceptionHandlerResult> handleException(
       DataFetcherExceptionHandlerParameters handlerParameters) {

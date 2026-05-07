@@ -102,8 +102,7 @@ public class CommentDatafetcher {
    * Builds a DGS-generated PageInfo instead of graphql.relay.DefaultPageInfo to match the type
    * expected by the DGS codegen types in DGS 7.x (Spring Boot 3 upgrade).
    */
-  private io.spring.graphql.types.PageInfo buildCommentPageInfo(
-      CursorPager<CommentData> comments) {
+  private io.spring.graphql.types.PageInfo buildCommentPageInfo(CursorPager<CommentData> comments) {
     return io.spring.graphql.types.PageInfo.newBuilder()
         .startCursor(
             comments.getStartCursor() == null ? null : comments.getStartCursor().toString())
