@@ -1,0 +1,62 @@
+// Article microservice - extracted from the monolith's Article bounded context
+// Standalone Spring Boot 3.2.5 application for articles, comments, tags, and favorites
+plugins {
+    id 'org.springframework.boot' version '3.2.5'
+    id 'io.spring.dependency-management' version '1.1.4'
+    id 'java'
+}
+
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '17'
+targetCompatibility = '17'
+
+repositories {
+    mavenCentral()
+}
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+dependencies {
+    // Web and REST
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    // Health checks and monitoring
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
+    // Database / MyBatis / Flyway (same stack as monolith)
+    implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.3'
+    implementation 'org.flywaydb:flyway-core'
+    implementation 'org.xerial:sqlite-jdbc:3.45.2.0'
+
+    // JWT for token validation (shared secret with user-service)
+    implementation 'io.jsonwebtoken:jjwt-api:0.12.5'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.5',
+                'io.jsonwebtoken:jjwt-jackson:0.12.5'
+
+    // Utilities
+    implementation 'joda-time:joda-time:2.12.7'
+    implementation 'com.fasterxml.jackson.core:jackson-databind'
+
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+
+    // Testing
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.security:spring-security-test'
+    testImplementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter-test:3.0.3'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
+
+tasks.named('clean') {
+    doFirst {
+        delete './article-dev.db'
+    }
+}
