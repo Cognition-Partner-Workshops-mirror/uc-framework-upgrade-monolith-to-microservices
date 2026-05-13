@@ -1,0 +1,44 @@
+# Docker Compose for running the main app (user-service) and the extracted article-service.
+# Both services share the same JWT secret for cross-service token validation.
+version: '3.8'
+
+services:
+  # Main application (user-service) — handles users, profiles, auth, follows
+  user-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_APPLICATION_NAME=user-service
+      - JWT_SECRET=nRvyYC4soFxBdZ-F-5Nnzz5USXstR1YylsTd-mA0aKtI9HUlriGrtkf-TiuDapkLiUCogO3JOK7kwZisrHp6wA
+      - JWT_SESSIONTIME=86400
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 30s
+
+  # Article microservice — handles articles, tags, comments, favorites
+  article-service:
+    build:
+      context: ./article-service
+      dockerfile: Dockerfile
+    ports:
+      - "8081:8081"
+    environment:
+      - SPRING_APPLICATION_NAME=article-service
+      - USER_SERVICE_URL=http://user-service:8080
+      - JWT_SECRET=nRvyYC4soFxBdZ-F-5Nnzz5USXstR1YylsTd-mA0aKtI9HUlriGrtkf-TiuDapkLiUCogO3JOK7kwZisrHp6wA
+      - JWT_SESSIONTIME=86400
+    depends_on:
+      user-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/actuator/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 30s

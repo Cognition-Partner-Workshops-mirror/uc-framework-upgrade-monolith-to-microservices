@@ -1,0 +1,48 @@
+plugins {
+    id 'org.springframework.boot' version '3.2.4'
+    id 'io.spring.dependency-management' version '1.1.4'
+    id 'java'
+}
+
+group = 'io.spring'
+version = '0.0.1-SNAPSHOT'
+
+// Article microservice runs on Java 17 (Spring Boot 3 requirement)
+sourceCompatibility = '17'
+targetCompatibility = '17'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    // MyBatis for SQL data mapping (consistent with main app)
+    implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.3'
+    implementation 'org.flywaydb:flyway-core'
+    implementation 'org.xerial:sqlite-jdbc:3.45.1.0'
+    // JWT for token validation on cross-service calls
+    implementation 'io.jsonwebtoken:jjwt-api:0.12.5'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.5',
+                'io.jsonwebtoken:jjwt-jackson:0.12.5'
+    implementation 'joda-time:joda-time:2.12.7'
+
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter-test:3.0.3'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
+
+// Clean database before running to avoid Flyway migration conflicts
+tasks.named('bootRun') {
+    doFirst {
+        delete './article-dev.db'
+    }
+}
