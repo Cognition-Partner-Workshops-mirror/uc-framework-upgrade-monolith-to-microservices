@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- Read-only mapper for querying comments by article ID -->
+<mapper namespace="io.spring.articleservice.infrastructure.mybatis.readservice.CommentReadService">
+
+    <select id="findByArticleId" resultType="io.spring.articleservice.core.comment.Comment">
+        SELECT id, body, user_id as userId, article_id as articleId, created_at as createdAt
+        FROM comments WHERE article_id = #{articleId}
+        ORDER BY created_at DESC
+    </select>
+
+</mapper>

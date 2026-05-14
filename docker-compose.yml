@@ -1,0 +1,50 @@
+# Docker Compose configuration for running both services together
+# user-service (monolith) runs on port 8080, article-service on port 8081
+version: '3.8'
+
+services:
+  # User-service (the original monolith) — handles users, profiles, authentication
+  user-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=default
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - realworld-network
+
+  # Article-service (extracted microservice) — handles articles, tags, comments, favorites
+  # Depends on user-service for resolving user profiles via REST
+  article-service:
+    build:
+      context: ./article-service
+      dockerfile: Dockerfile
+    ports:
+      - "8081:8081"
+    environment:
+      - SPRING_PROFILES_ACTIVE=default
+      # Point to user-service for cross-service communication
+      - USER_SERVICE_URL=http://user-service:8080
+    depends_on:
+      user-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8081/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - realworld-network
+
+networks:
+  realworld-network:
+    driver: bridge

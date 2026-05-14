@@ -1,0 +1,55 @@
+plugins {
+    id 'org.springframework.boot' version '3.2.0'
+    id 'io.spring.dependency-management' version '1.1.4'
+    id 'java'
+}
+
+group = 'io.spring'
+version = '0.0.1-SNAPSHOT'
+// Article microservice runs on Java 17 (Spring Boot 3.x requirement)
+sourceCompatibility = '17'
+targetCompatibility = '17'
+
+repositories {
+    mavenCentral()
+}
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    // Actuator provides health check endpoints for Docker Compose health checks
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.3'
+    implementation 'org.flywaydb:flyway-core'
+    // JJWT 0.12.x for Jakarta namespace support
+    implementation 'io.jsonwebtoken:jjwt-api:0.12.3'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.3',
+                'io.jsonwebtoken:jjwt-jackson:0.12.3'
+    implementation 'joda-time:joda-time:2.12.5'
+    implementation 'org.xerial:sqlite-jdbc:3.44.1.0'
+
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.security:spring-security-test'
+    testImplementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter-test:3.0.3'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
+
+// Clean database before running to avoid Flyway migration conflicts
+tasks.named('bootRun') {
+    doFirst {
+        delete './article-dev.db'
+    }
+}

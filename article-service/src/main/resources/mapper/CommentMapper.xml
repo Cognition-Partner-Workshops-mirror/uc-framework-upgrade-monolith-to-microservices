@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- MyBatis mapper for Comment CRUD — extracted from the monolith -->
+<mapper namespace="io.spring.articleservice.infrastructure.mybatis.mapper.CommentMapper">
+
+    <!-- Insert a new comment -->
+    <insert id="insert">
+        INSERT INTO comments (id, body, user_id, article_id, created_at)
+        VALUES (#{comment.id}, #{comment.body}, #{comment.userId}, #{comment.articleId}, #{comment.createdAt})
+    </insert>
+
+    <!-- Find a comment by article ID and comment ID -->
+    <select id="findById" resultType="io.spring.articleservice.core.comment.Comment">
+        SELECT id, body, user_id as userId, article_id as articleId, created_at as createdAt
+        FROM comments WHERE article_id = #{articleId} AND id = #{id}
+    </select>
+
+    <!-- Delete a comment by ID -->
+    <delete id="delete">
+        DELETE FROM comments WHERE id = #{id}
+    </delete>
+
+</mapper>
