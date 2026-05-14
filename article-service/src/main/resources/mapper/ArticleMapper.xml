@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- MyBatis mapper for Article CRUD — extracted from the monolith -->
+<mapper namespace="io.spring.articleservice.infrastructure.mybatis.mapper.ArticleMapper">
+
+    <resultMap id="articleResult" type="io.spring.articleservice.core.article.Article">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="title" property="title"/>
+        <result column="slug" property="slug"/>
+        <result column="description" property="description"/>
+        <result column="body" property="body"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
+        <collection property="tags" ofType="io.spring.articleservice.core.article.Tag">
+            <id column="tag_id" property="id"/>
+            <result column="tag_name" property="name"/>
+        </collection>
+    </resultMap>
+
+    <!-- Find article by ID with associated tags -->
+    <select id="findById" resultMap="articleResult">
+        SELECT a.id, a.user_id, a.title, a.slug, a.description, a.body,
+               a.created_at, a.updated_at, t.id as tag_id, t.name as tag_name
+        FROM articles a
+        LEFT JOIN article_tags at2 ON a.id = at2.article_id
+        LEFT JOIN tags t ON at2.tag_id = t.id
+        WHERE a.id = #{id}
+    </select>
+
+    <!-- Find article by slug with associated tags -->
+    <select id="findBySlug" resultMap="articleResult">
+        SELECT a.id, a.user_id, a.title, a.slug, a.description, a.body,
+               a.created_at, a.updated_at, t.id as tag_id, t.name as tag_name
+        FROM articles a
+        LEFT JOIN article_tags at2 ON a.id = at2.article_id
+        LEFT JOIN tags t ON at2.tag_id = t.id
+        WHERE a.slug = #{slug}
+    </select>
+
+    <!-- Insert a new article -->
+    <insert id="insert">
+        INSERT INTO articles (id, user_id, title, slug, description, body, created_at, updated_at)
+        VALUES (#{article.id}, #{article.userId}, #{article.title}, #{article.slug},
+                #{article.description}, #{article.body}, #{article.createdAt}, #{article.updatedAt})
+    </insert>
+
+    <!-- Update an existing article -->
+    <update id="update">
+        UPDATE articles SET title = #{article.title}, slug = #{article.slug},
+               description = #{article.description}, body = #{article.body},
+               updated_at = #{article.updatedAt}
+        WHERE id = #{article.id}
+    </update>
+
+    <!-- Delete an article and its tag/favorite/comment relationships -->
+    <delete id="delete">
+        DELETE FROM article_tags WHERE article_id = #{id};
+        DELETE FROM article_favorites WHERE article_id = #{id};
+        DELETE FROM comments WHERE article_id = #{id};
+        DELETE FROM articles WHERE id = #{id};
+    </delete>
+
+    <!-- Find a tag by name -->
+    <select id="findTag" resultType="io.spring.articleservice.core.article.Tag">
+        SELECT id, name FROM tags WHERE name = #{tagName}
+    </select>
+
+    <!-- Insert a new tag -->
+    <insert id="insertTag">
+        INSERT INTO tags (id, name) VALUES (#{tag.id}, #{tag.name})
+    </insert>
+
+    <!-- Associate an article with a tag -->
+    <insert id="insertArticleTagRelation">
+        INSERT INTO article_tags (article_id, tag_id) VALUES (#{articleId}, #{tagId})
+    </insert>
+
+</mapper>

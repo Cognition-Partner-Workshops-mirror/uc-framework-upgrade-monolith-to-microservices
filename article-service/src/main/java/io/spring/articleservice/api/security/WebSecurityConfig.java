@@ -1,4 +1,4 @@
-package io.spring.api.security;
+package io.spring.articleservice.api.security;
 
 import static java.util.Arrays.asList;
 
@@ -6,12 +6,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-// Migrated from WebSecurityConfigurerAdapter (removed in Spring Security 6) to SecurityFilterChain bean pattern
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -19,7 +16,8 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-// Removed extends WebSecurityConfigurerAdapter — deprecated in Spring Security 5.7, removed in 6.0
+// Security configuration for article-service using SecurityFilterChain (Spring Security 6 pattern)
+// JWT tokens are validated locally — no call to user-service needed for auth
 @Configuration
 @EnableWebSecurity
 public class WebSecurityConfig {
@@ -29,16 +27,9 @@ public class WebSecurityConfig {
     return new JwtTokenFilter();
   }
 
-  @Bean
-  public PasswordEncoder passwordEncoder() {
-    return new BCryptPasswordEncoder();
-  }
-
-  // Migrated from configure(HttpSecurity) override to SecurityFilterChain bean
-  // Updated: authorizeRequests() -> authorizeHttpRequests(), antMatchers() -> requestMatchers()
+  // SecurityFilterChain bean — replaces the deprecated WebSecurityConfigurerAdapter
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-
     http.csrf(csrf -> csrf.disable())
         .cors(cors -> cors.configurationSource(corsConfigurationSource()))
         .exceptionHandling(
@@ -47,29 +38,20 @@ public class WebSecurityConfig {
             session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .authorizeHttpRequests(
             auth ->
-                auth.requestMatchers(HttpMethod.OPTIONS)
-                    .permitAll()
-                    .requestMatchers("/graphiql")
-                    .permitAll()
-                    .requestMatchers("/graphql")
-                    .permitAll()
-                    // Actuator health endpoint for service health checks
+                auth
+                    // Actuator health endpoint — used by Docker Compose healthcheck
                     .requestMatchers("/actuator/**")
                     .permitAll()
-                    // Internal API for cross-service communication (article-service → user-service)
-                    .requestMatchers("/api/internal/**")
+                    // Public read endpoints for articles, tags, and comments
+                    .requestMatchers(HttpMethod.GET, "/articles/**", "/tags")
                     .permitAll()
+                    // Feed requires authentication
                     .requestMatchers(HttpMethod.GET, "/articles/feed")
                     .authenticated()
-                    .requestMatchers(HttpMethod.POST, "/users", "/users/login")
-                    .permitAll()
-                    .requestMatchers(HttpMethod.GET, "/articles/**", "/profiles/**", "/tags")
-                    .permitAll()
                     .anyRequest()
                     .authenticated());
 
     http.addFilterBefore(jwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
-
     return http.build();
   }
 
@@ -78,12 +60,7 @@ public class WebSecurityConfig {
     final CorsConfiguration configuration = new CorsConfiguration();
     configuration.setAllowedOrigins(asList("*"));
     configuration.setAllowedMethods(asList("HEAD", "GET", "POST", "PUT", "DELETE", "PATCH"));
-    // setAllowCredentials(true) is important, otherwise:
-    // The value of the 'Access-Control-Allow-Origin' header in the response must not be the
-    // wildcard '*' when the request's credentials mode is 'include'.
     configuration.setAllowCredentials(false);
-    // setAllowedHeaders is important! Without it, OPTIONS preflight request
-    // will fail with 403 Invalid CORS request
     configuration.setAllowedHeaders(asList("Authorization", "Cache-Control", "Content-Type"));
     final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
     source.registerCorsConfiguration("/**", configuration);

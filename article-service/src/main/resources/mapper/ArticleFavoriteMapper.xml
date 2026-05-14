@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- MyBatis mapper for ArticleFavorite operations — extracted from the monolith -->
+<mapper namespace="io.spring.articleservice.infrastructure.mybatis.mapper.ArticleFavoriteMapper">
+
+    <!-- Find a favorite record by article and user ID -->
+    <select id="find" resultType="io.spring.articleservice.core.favorite.ArticleFavorite">
+        SELECT article_id as articleId, user_id as userId
+        FROM article_favorites
+        WHERE article_id = #{articleId} AND user_id = #{userId}
+    </select>
+
+    <!-- Insert a new favorite record -->
+    <insert id="insert">
+        INSERT INTO article_favorites (article_id, user_id)
+        VALUES (#{favorite.articleId}, #{favorite.userId})
+    </insert>
+
+    <!-- Delete a favorite record -->
+    <delete id="delete">
+        DELETE FROM article_favorites
+        WHERE article_id = #{favorite.articleId} AND user_id = #{favorite.userId}
+    </delete>
+
+</mapper>
