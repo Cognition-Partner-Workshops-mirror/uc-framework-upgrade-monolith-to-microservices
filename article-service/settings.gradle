@@ -1,0 +1,3 @@
+// Standalone settings for the article-service microservice.
+// This service builds independently from the monolith.
+rootProject.name = 'article-service'

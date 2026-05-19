@@ -1,0 +1,65 @@
+# Docker Compose configuration for the RealWorld blogging platform.
+# Runs the main app (user-service) and the extracted article-service together.
+# Both services share a JWT secret for authentication token validation.
+version: '3.8'
+
+services:
+  # Main monolith service (handles users, profiles, authentication).
+  # After extraction, this acts as the "user-service" in the microservices architecture.
+  user-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:sqlite:/data/dev.db
+      - JWT_SECRET=nRvyYC4soFxBdZ-F-5Nnzz5USXstR1YylsTd-mA0aKtI9HUlriGrtkf-TiuDapkLiUCogO3JOK7kwZisrHp6wA
+      - JWT_SESSIONTIME=86400
+    volumes:
+      - user-data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 5
+      start_period: 40s
+    networks:
+      - realworld-net
+
+  # Extracted article-service microservice (handles articles, tags, comments, favorites).
+  # Communicates with user-service via REST for profile resolution.
+  article-service:
+    build:
+      context: ./article-service
+      dockerfile: Dockerfile
+    ports:
+      - "8081:8081"
+    environment:
+      - SERVER_PORT=8081
+      - SPRING_DATASOURCE_URL=jdbc:sqlite:/data/article-dev.db
+      - JWT_SECRET=nRvyYC4soFxBdZ-F-5Nnzz5USXstR1YylsTd-mA0aKtI9HUlriGrtkf-TiuDapkLiUCogO3JOK7kwZisrHp6wA
+      - JWT_SESSIONTIME=86400
+      # Cross-service communication: article-service calls user-service for profiles
+      - USER_SERVICE_URL=http://user-service:8080
+    volumes:
+      - article-data:/data
+    depends_on:
+      user-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/actuator/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 5
+      start_period: 40s
+    networks:
+      - realworld-net
+
+volumes:
+  user-data:
+  article-data:
+
+networks:
+  realworld-net:
+    driver: bridge

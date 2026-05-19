@@ -14,7 +14,8 @@ public class DefaultJwtServiceTest {
   @BeforeEach
   public void setUp() {
     jwtService =
-        new DefaultJwtService("123123123123123123123123123123123123123123123123123123123123", 3600);
+        // jjwt 0.12.x requires minimum 64-byte key for HS512 (was 60 bytes previously)
+        new DefaultJwtService("1231231231231231231231231231231231231231231231231231231231231231231231231231231231231231", 3600);
   }
 
   @Test
