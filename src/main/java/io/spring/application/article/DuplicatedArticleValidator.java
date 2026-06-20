@@ -2,8 +2,9 @@ package io.spring.application.article;
 
 import io.spring.application.ArticleQueryService;
 import io.spring.core.article.Article;
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
+// Migrated: javax.validation -> jakarta.validation (Jakarta EE 10 namespace)
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
 import org.springframework.beans.factory.annotation.Autowired;
 
 class DuplicatedArticleValidator

@@ -1,8 +1,9 @@
 package io.spring.application.user;
 
 import com.fasterxml.jackson.annotation.JsonRootName;
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotBlank;
+// Migrated: javax.validation -> jakarta.validation (Jakarta EE 10 namespace)
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

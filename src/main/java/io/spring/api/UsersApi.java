@@ -15,9 +15,10 @@ import io.spring.core.user.UserRepository;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import javax.validation.Valid;
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotBlank;
+// Migrated: javax.validation -> jakarta.validation (Jakarta EE 10 namespace)
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

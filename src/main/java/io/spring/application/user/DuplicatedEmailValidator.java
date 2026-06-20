@@ -1,8 +1,9 @@
 package io.spring.application.user;
 
 import io.spring.core.user.UserRepository;
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
+// Migrated: javax.validation -> jakarta.validation (Jakarta EE 10 namespace)
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class DuplicatedEmailValidator

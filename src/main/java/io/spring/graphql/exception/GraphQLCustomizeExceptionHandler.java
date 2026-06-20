@@ -16,9 +16,11 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
-import javax.validation.ConstraintViolation;
-import javax.validation.ConstraintViolationException;
+// Migrated: javax.validation -> jakarta.validation (Jakarta EE 10 namespace)
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -27,8 +29,10 @@ public class GraphQLCustomizeExceptionHandler implements DataFetcherExceptionHan
   private final DefaultDataFetcherExceptionHandler defaultHandler =
       new DefaultDataFetcherExceptionHandler();
 
+  // Upgraded: DGS 8.x changed interface from onException() to handleException()
+  // and returns CompletableFuture<DataFetcherExceptionHandlerResult>
   @Override
-  public DataFetcherExceptionHandlerResult onException(
+  public CompletableFuture<DataFetcherExceptionHandlerResult> handleException(
       DataFetcherExceptionHandlerParameters handlerParameters) {
     if (handlerParameters.getException() instanceof InvalidAuthenticationException) {
       GraphQLError graphqlError =
@@ -37,7 +41,8 @@ public class GraphQLCustomizeExceptionHandler implements DataFetcherExceptionHan
               .message(handlerParameters.getException().getMessage())
               .path(handlerParameters.getPath())
               .build();
-      return DataFetcherExceptionHandlerResult.newResult().error(graphqlError).build();
+      return CompletableFuture.completedFuture(
+          DataFetcherExceptionHandlerResult.newResult().error(graphqlError).build());
     } else if (handlerParameters.getException() instanceof ConstraintViolationException) {
       List<FieldErrorResource> errors = new ArrayList<>();
       for (ConstraintViolation<?> violation :
@@ -61,9 +66,10 @@ public class GraphQLCustomizeExceptionHandler implements DataFetcherExceptionHan
               .path(handlerParameters.getPath())
               .extensions(errorsToMap(errors))
               .build();
-      return DataFetcherExceptionHandlerResult.newResult().error(graphqlError).build();
+      return CompletableFuture.completedFuture(
+          DataFetcherExceptionHandlerResult.newResult().error(graphqlError).build());
     } else {
-      return defaultHandler.onException(handlerParameters);
+      return defaultHandler.handleException(handlerParameters);
     }
   }
 
