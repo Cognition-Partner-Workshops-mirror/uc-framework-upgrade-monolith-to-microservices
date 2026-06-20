@@ -9,7 +9,8 @@ import io.spring.application.user.UserService;
 import io.spring.core.user.User;
 import java.util.HashMap;
 import java.util.Map;
-import javax.validation.Valid;
+// Migrated: javax.validation -> jakarta.validation (Jakarta EE 10 namespace)
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;

@@ -2,7 +2,8 @@ package io.spring.application.article;
 
 import com.fasterxml.jackson.annotation.JsonRootName;
 import java.util.List;
-import javax.validation.constraints.NotBlank;
+// Migrated: javax.validation -> jakarta.validation (Jakarta EE 10 namespace)
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

@@ -1,15 +1,20 @@
 plugins {
-    id 'org.springframework.boot' version '2.6.3'
-    id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+    // Upgraded: Spring Boot 2.6.3 -> 3.2.5 (Jakarta EE 10, Java 17+ baseline)
+    id 'org.springframework.boot' version '3.2.5'
+    // Upgraded: dependency-management 1.0.11.RELEASE -> 1.1.5 (required for Spring Boot 3.x)
+    id 'io.spring.dependency-management' version '1.1.5'
     id 'java'
-    id "com.netflix.dgs.codegen" version "5.0.6"
-    id "com.diffplug.spotless" version "6.2.1"
+    // Upgraded: DGS codegen 5.0.6 -> 6.2.1 (Spring Boot 3.x / Jakarta compatible)
+    id "com.netflix.dgs.codegen" version "6.2.1"
+    // Upgraded: spotless 6.2.1 -> 6.25.0 (Java 17+ compatibility)
+    id "com.diffplug.spotless" version "6.25.0"
     id 'jacoco'
 }
 
 version = '0.0.1-SNAPSHOT'
-sourceCompatibility = '11'
-targetCompatibility = '11'
+// Upgraded: Java 11 -> 17 (minimum required by Spring Boot 3.x)
+sourceCompatibility = '17'
+targetCompatibility = '17'
 
 spotless {
     java {
@@ -22,7 +27,8 @@ spotless {
 }
 
 jacoco {
-    toolVersion = "0.8.7"
+    // Upgraded: JaCoCo 0.8.7 -> 0.8.11 (Java 17 bytecode support)
+    toolVersion = "0.8.11"
 }
 
 jacocoTestReport {
@@ -60,26 +66,33 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-hateoas'
     implementation 'org.springframework.boot:spring-boot-starter-security'
-    implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:2.2.2'
-    implementation 'com.netflix.graphql.dgs:graphql-dgs-spring-boot-starter:4.9.21'
+    // Upgraded: mybatis-spring-boot-starter 2.2.2 -> 3.0.3 (Jakarta namespace support)
+    implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.3'
+    // Upgraded: DGS Spring Boot starter 4.9.21 -> 8.5.1 (Spring Boot 3.2 compatible)
+    implementation 'com.netflix.graphql.dgs:graphql-dgs-spring-boot-starter:8.7.1'
     implementation 'org.flywaydb:flyway-core'
-    implementation 'io.jsonwebtoken:jjwt-api:0.11.2'
-    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.2',
-                'io.jsonwebtoken:jjwt-jackson:0.11.2'
-    implementation 'joda-time:joda-time:2.10.13'
-    implementation 'org.xerial:sqlite-jdbc:3.36.0.3'
+    // Upgraded: jjwt 0.11.2 -> 0.12.5 (Jakarta namespace, deprecated API removal)
+    implementation 'io.jsonwebtoken:jjwt-api:0.12.5'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.5',
+                'io.jsonwebtoken:jjwt-jackson:0.12.5'
+    implementation 'joda-time:joda-time:2.12.7'
+    // Upgraded: sqlite-jdbc 3.36.0.3 -> 3.45.1.0 (Java 17 compatibility)
+    implementation 'org.xerial:sqlite-jdbc:3.45.1.0'
 
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
 
-    testImplementation 'io.rest-assured:rest-assured:4.5.1'
-    testImplementation 'io.rest-assured:json-path:4.5.1'
-    testImplementation 'io.rest-assured:xml-path:4.5.1'
-    testImplementation 'io.rest-assured:spring-mock-mvc:4.5.1'
+    // Upgraded: rest-assured 4.5.1 -> 5.4.0 (Jakarta namespace / Spring 6 support)
+    testImplementation 'io.rest-assured:rest-assured:5.4.0'
+    testImplementation 'io.rest-assured:json-path:5.4.0'
+    testImplementation 'io.rest-assured:xml-path:5.4.0'
+    testImplementation 'io.rest-assured:spring-mock-mvc:5.4.0'
     testImplementation 'org.springframework.security:spring-security-test'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter-test:2.2.2'
-    testImplementation 'org.mockito:mockito-inline:4.0.0'
+    // Upgraded: mybatis test starter to 3.0.3 (matching main starter)
+    testImplementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter-test:3.0.3'
+    // Replaced: mockito-inline 4.0.0 -> mockito-core (inline mocking is default in Mockito 5+)
+    testImplementation 'org.mockito:mockito-core'
     
     // Selenium E2E testing
     testImplementation 'org.seleniumhq.selenium:selenium-java:4.15.0'
